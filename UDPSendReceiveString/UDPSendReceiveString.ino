@@ -21,8 +21,8 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {  
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 1, 177);
+  0x90, 0xA2, 0xDA, 0x0E, 0xA8, 0x54 };
+IPAddress ip(192, 168, 1, 120);
 
 unsigned int localPort = 8888;      // local port to listen on
 
@@ -99,7 +99,7 @@ void loop() {
  }
  
  void keyPressed() {
- String ip       = "192.168.1.177";	// the remote IP address
+ String ip       = "192.168.1.120";	// the remote IP address
  int port        = 8888;		// the destination port
  
  udp.send("Hello World", ip, port );   // the message to send
