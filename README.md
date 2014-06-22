@@ -4,7 +4,7 @@ arduino_garden
 playground for garden automation
 
 
-tempsensor
+### tempsensor
 
 blå = plus 5V
 
@@ -13,7 +13,7 @@ orange = data
 orange/vit = jord
 
 
-fuktsensor
+### fuktsensor
 
 brun+brun/vit = ena
 
