@@ -1,6 +1,15 @@
 arduino_garden
 ==============
 
+
+ToDo:
+* ställa in rätt MAC adress
+* kalibrera sensor
+* rätt pinnar för sensorerna
+* skriva ut Long till MQTT
+* prenumerera på ett värde
+
+
 playground for garden automation
 
 
