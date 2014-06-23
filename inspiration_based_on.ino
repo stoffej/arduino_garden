@@ -6,8 +6,20 @@
 // include the library code only for LCD display version
 #include <LiquidCrystal.h>
 #include <math.h>
+#include <SPI.h>
+#include <Ethernet.h>
+#include <PubSubClient.h>
 
 #define NUM_READS 11    // Number of sensor reads for filtering
+
+// MAC address from Ethernet shield sticker under board
+byte mac[6] = { 0x90, 0xA2, 0xDA, 0x0E, 0xA8, 0x54 };
+IPAddress ip(192, 168, 1, 201); // IP address, may need to change depending on network
+
+char macstr[18];
+
+EthernetClient ethClient;
+PubSubClient client("192.168.1.110", 1883, callback, ethClient);
 
 typedef struct {        // Structure to be used in percentage and resistance values matrix to be filtered (have to be in pairs)
   int moisture;
@@ -28,6 +40,19 @@ byte ohm[8] = {
   B11011,
   B00000
 };
+a
+boolean connect_mqtt() {
+  Serial.print("MQTT...");
+  if (client.connect(macstr)) {
+    Serial.println("connected");
+    char topic[35];
+    snprintf(topic, 35, "house/node/%s/state", macstr);
+    client.publish(topic, "start");
+    return true;
+  }
+  Serial.println("Failed.");
+  return false;
+}
 
 const long knownResistor = 1200;  // Constant value of known resistor in Ohms
 
@@ -40,7 +65,35 @@ int sensorVoltage;                // Measured sensor voltage
 
 values valueOf[NUM_READS];        // Calculated moisture percentages and resistances to be sorted and filtered
 
-int i;                            // Simple index variable
+int i;     
+
+
+// handles message arrived on subscribed topic(s)
+void callback(char* topic, byte* payload, unsigned int length) {
+
+  int i = 0;
+
+  Serial.println("Message arrived:  topic: " + String(topic));
+  Serial.println("Length: " + String(length,DEC));
+  
+  // create character buffer with ending null terminator (string)
+  for(i=0; i<length; i++) {
+    message_buff[i] = payload[i];
+  }
+  message_buff[i] = '\0';
+  
+  String msgString = String(message_buff);
+  
+  Serial.println("Payload: " + msgString);
+  /*
+  if (msgString.equals("{\"command\":{\"lightmode\": \"OFF\"}}")) {
+    senseMode = MODE_OFF;
+  } else if (msgString.equals("{\"command\":{\"lightmode\": \"ON\"}}")) {
+    senseMode = MODE_ON;
+  } else if (msgString.equals("{\"command\":{\"lightmode\": \"SENSE\"}}")) {
+    senseMode = MODE_SENSE;
+  }*/
+}                       // Simple index variable
 
 void setup() {
   // initialize serial communications at 9600 bps:
@@ -59,13 +112,30 @@ void setup() {
   // Pin 7 is sense resistor voltage supply 2
   pinMode(7, OUTPUT);   
 
+  snprintf(macstr, 18, "%02x:%02x:%02x:%02x:%02x:%02x",
+    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  Serial.print(macstr);
+  Serial.print(")...");
+  Ethernet.begin(mac,ip);
+  Serial.println(Ethernet.localIP());
+
   delay(500);   
 }
 
 void loop() {
 
+/*MQTT */
+  if (!client.connected() && !connect_mqtt()) {
+    return;
+  }
+  client.loop();
+
+
   // read sensor, filter, and calculate resistance value
   // Noise filter: median filter
+
+
+
 
   for (i=0; i<NUM_READS; i++) {
 
@@ -116,6 +186,15 @@ void loop() {
   lcd.print(valueOf[NUM_READS/2].resistance);
   lcd.print(" ");
   lcd.write(1);
+
+/*skicka till MQTT */
+  snprintf(topic, 35, "garden/odling/1/moisture");
+  snprintf(value, 6, "%d", valueOf[NUM_READS/2].moisture);
+  client.publish(topic, value);  
+
+  snprintf(topic, 35, "garden/odling/1/resistance");
+  snprintf(value, 6, "%ld", valueOf[NUM_READS/2].resistance);
+  client.publish(topic, value);  
 
   // delay until next measurement (msec)
   delay(5000);   
