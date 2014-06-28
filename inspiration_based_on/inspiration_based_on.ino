@@ -4,17 +4,24 @@
 // www.vanderleevineyard.com
 
 // include the library code only for LCD display version
+#include <SPI.h>
 #include <LiquidCrystal.h>
 #include <math.h>
-#include <SPI.h>
 #include <Ethernet.h>
 #include <PubSubClient.h>
 
 #define NUM_READS 11    // Number of sensor reads for filtering
 
-// MAC address from Ethernet shield sticker under board
-byte mac[6] = { 0x90, 0xA2, 0xDA, 0x0E, 0xA8, 0x54 };
-IPAddress ip(192, 168, 1, 201); // IP address, may need to change depending on network
+void setup() {
+}
+
+void loop(){
+  
+
+}
+
+#if 0
+IPAddress ip(192, 168, 1, 200); // IP address, may need to change depending on network
 
 char macstr[18];
 
@@ -226,3 +233,4 @@ void sortMoistures() {
         valueOf[j] = temp;
       }
 }
+#endif
